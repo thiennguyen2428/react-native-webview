@@ -99,8 +99,8 @@ public class RNCWebChromeClient extends WebChromeClient {
 
         Activity mActivity = reactContext.getCurrentActivity();
 
-        ((FrameLayout)mActivity.getWindow().getDecorView()).removeView(this.mCustomView);
         mActivity.setRequestedOrientation(this.mOriginalOrientation);
+        ((FrameLayout)mActivity.getWindow().getDecorView()).removeView(this.mCustomView);
 
         if (Build.VERSION.SDK_INT >= 21) {
             mActivity.getWindow().setNavigationBarColor(iNavColor);
@@ -109,8 +109,8 @@ public class RNCWebChromeClient extends WebChromeClient {
             mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
 
-        mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 
         this.mCustomView = null;
         this.mCustomViewCallback.onCustomViewHidden();
