@@ -98,7 +98,8 @@ public class RNCWebChromeClient extends WebChromeClient {
     public void onHideCustomView() {
 
         Activity mActivity = reactContext.getCurrentActivity();
-
+        
+        mCustomView.setPadding(0, 0, 0, 0);
         mActivity.setRequestedOrientation(this.mOriginalOrientation);
         ((FrameLayout)mActivity.getWindow().getDecorView()).removeView(this.mCustomView);
 
@@ -138,18 +139,18 @@ public class RNCWebChromeClient extends WebChromeClient {
                 new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
         if (Build.VERSION.SDK_INT >= 21) {
-//             mActivity.getWindow().getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-//                 @Override
-//                 public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-//                     if (insets != null && mCustomView != null) {
-//                         mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
-//                     }
-//                     return insets;
-//                 }
-//             });
+            mActivity.getWindow().getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                @Override
+                public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                    if (insets != null && mCustomView != null) {
+                        mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
+                    }
+                    return insets;
+                }
+            });
 
-//             WindowInsets insets = mActivity.getWindow().getDecorView().getRootWindowInsets();
-//             mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
+            WindowInsets insets = mActivity.getWindow().getDecorView().getRootWindowInsets();
+            mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
 
             iNavColor = mActivity.getWindow().getNavigationBarColor();
             mActivity.getWindow().setNavigationBarColor(Color.BLACK);
