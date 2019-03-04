@@ -140,15 +140,15 @@ public class RNCWebChromeClient extends WebChromeClient {
                 new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
         if (Build.VERSION.SDK_INT >= 21) {
-//             mActivity.getWindow().getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-//                 @Override
-//                 public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-//                     if (insets != null && mCustomView != null) {
-//                         mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
-//                     }
-//                     return insets;
-//                 }
-//             });
+            mActivity.getWindow().getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                @Override
+                public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                    if (insets != null && mCustomView != null) {
+                        mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
+                    }
+                    return insets;
+                }
+            });
 
             WindowInsets insets = mActivity.getWindow().getDecorView().getRootWindowInsets();
             mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
