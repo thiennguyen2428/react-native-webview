@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
@@ -32,12 +33,17 @@ public class RNCWebChromeClient extends WebChromeClient {
     private ReactContext reactContext;
     private View mCustomView;
 
+    private final Handler handler = new Handler();
+
     private WebChromeClient.CustomViewCallback mCustomViewCallback;
     protected FrameLayout mFullscreenContainer;
     private int mOriginalOrientation;
     private int mOriginalSystemUiVisibility;
 
     private int iNavColor;
+
+    View.OnSystemUiVisibilityChangeListener listener1;
+    View.OnApplyWindowInsetsListener listener2;
 
 
     public RNCWebChromeClient(RNCWebViewManager context, ReactContext reactContext) {
@@ -98,11 +104,9 @@ public class RNCWebChromeClient extends WebChromeClient {
     public void onHideCustomView() {
 
         Activity mActivity = reactContext.getCurrentActivity();
-        
-        this.mCustomView.setPadding(0, 0, 0, 0);
-        
+
         ((FrameLayout)mActivity.getWindow().getDecorView()).removeView(this.mCustomView);
-         mActivity.setRequestedOrientation(this.mOriginalOrientation);
+        mActivity.setRequestedOrientation(this.mOriginalOrientation);
 
         if (Build.VERSION.SDK_INT >= 21) {
             mActivity.getWindow().setNavigationBarColor(iNavColor);
@@ -113,7 +117,19 @@ public class RNCWebChromeClient extends WebChromeClient {
 
         mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-       
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            WindowInsets insets = mActivity.getWindow().getDecorView().getRootWindowInsets();
+
+            mActivity.getWindow().getDecorView().setOnApplyWindowInsetsListener(null);
+            mActivity.getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(null);
+
+            this.listener1 = null;
+            this.listener2 = null;
+
+            mCustomView.setPadding(0, 0, 0, 0);
+        }
+        
         this.mCustomView = null;
         this.mCustomViewCallback.onCustomViewHidden();
         this.mCustomViewCallback = null;
@@ -140,21 +156,38 @@ public class RNCWebChromeClient extends WebChromeClient {
                 new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
         if (Build.VERSION.SDK_INT >= 21) {
-            mActivity.getWindow().getDecorView().setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-                @Override
-                public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                    if (insets != null && mCustomView != null) {
-                        mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
-                    }
-                    return insets;
-                }
-            });
-
             WindowInsets insets = mActivity.getWindow().getDecorView().getRootWindowInsets();
             mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
 
             iNavColor = mActivity.getWindow().getNavigationBarColor();
             mActivity.getWindow().setNavigationBarColor(Color.BLACK);
+
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            mActivity.getWindow().getDecorView().setSystemUiVisibility(uiOptions);
+
+            this.listener1 = new View.OnSystemUiVisibilityChangeListener() {
+                @Override
+                public void onSystemUiVisibilityChange(int visibility) {
+                    handler.removeCallbacksAndMessages(null);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+                            mActivity.getWindow().getDecorView().setSystemUiVisibility(uiOptions);
+                        }
+                    }, 3000);
+                }
+            };
+            mActivity.getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this.listener1);
+
+            this.listener2 = new View.OnApplyWindowInsetsListener() {
+                @Override
+                public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                    mCustomView.setPadding(0, 0, insets.getStableInsetRight(), insets.getStableInsetBottom());
+                    return insets;
+                }
+            };
+            mActivity.getWindow().getDecorView().setOnApplyWindowInsetsListener(this.listener2);
         }
         else {
             int uiOptions = mActivity.getWindow().getDecorView().getSystemUiVisibility();
