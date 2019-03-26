@@ -1,40 +1,27 @@
-package com.reactnativecommunity.webview.events;
+package com.reactnativecommunity.webview.events
 
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.uimanager.events.Event;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.uimanager.events.Event
+import com.facebook.react.uimanager.events.RCTEventEmitter
 
-public class TopShouldStartLoadWithRequestEvent extends Event<TopMessageEvent> {
-    public static final String EVENT_NAME = "topShouldStartLoadWithRequest";
-    private final String mUrl;
+/**
+ * Event emitted when shouldOverrideUrlLoading is called
+ */
+class TopShouldStartLoadWithRequestEvent(viewId: Int, private val mData: WritableMap) : Event<TopShouldStartLoadWithRequestEvent>(viewId) {
+  companion object {
+    const val EVENT_NAME = "topShouldStartLoadWithRequest"
+  }
 
-    public TopShouldStartLoadWithRequestEvent(int viewId, String url) {
-        super(viewId);
-        mUrl = url;
-    }
+  init {
+    mData.putString("navigationType", "other")
+  }
 
-    @Override
-    public String getEventName() {
-        return EVENT_NAME;
-    }
+  override fun getEventName(): String = EVENT_NAME
 
-    @Override
-    public boolean canCoalesce() {
-        return false;
-    }
+  override fun canCoalesce(): Boolean = false
 
-    @Override
-    public short getCoalescingKey() {
-        // All events for a given view can be coalesced.
-        return 0;
-    }
+  override fun getCoalescingKey(): Short = 0
 
-    @Override
-    public void dispatch(RCTEventEmitter rctEventEmitter) {
-        WritableMap data = Arguments.createMap();
-        data.putString("url", mUrl);
-        data.putString("navigationType", "other");
-        rctEventEmitter.receiveEvent(getViewTag(), EVENT_NAME, data);
-    }
+  override fun dispatch(rctEventEmitter: RCTEventEmitter) =
+    rctEventEmitter.receiveEvent(viewTag, EVENT_NAME, mData)
 }
