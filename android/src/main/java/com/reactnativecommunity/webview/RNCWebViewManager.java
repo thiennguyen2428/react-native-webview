@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -48,6 +49,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.events.ContentSizeChangeEvent;
 import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.EventDispatcher;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.reactnativecommunity.webview.events.TopLoadingErrorEvent;
 import com.reactnativecommunity.webview.events.TopLoadingFinishEvent;
 import com.reactnativecommunity.webview.events.TopLoadingProgressEvent;
@@ -646,6 +648,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       }
 
       mVideoView.setBackgroundColor(Color.BLACK);
+      mReactContext.getCurrentActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
       getRootView().addView(mVideoView, FULLSCREEN_LAYOUT_PARAMS);
       mWebView.setVisibility(View.GONE);
 
@@ -672,7 +675,13 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       }
 
       mReactContext.removeLifecycleEventListener(this);
+      WritableMap params = Arguments.createMap();
+      sendEvent(mReactContext, "ExitFullscreen", params);
     }
+
+    private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap params) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+      }
 
     @Override
     public boolean onConsoleMessage(ConsoleMessage message) {
